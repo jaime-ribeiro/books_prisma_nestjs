@@ -4,24 +4,65 @@ import { PrismaService } from 'src/database/PrismaService';
 
 @Injectable()
 export class BookService {
+  constructor(private prisma: PrismaService) {}
 
-  constructor(private prisma: PrismaService){}
-
-  async create(data: BookDTO){
+  async create(data: BookDTO) {
     const bookExists = await this.prisma.book.findFirst({
-      where :{
-        bar_code: data.bar_code
-      }
-    })
+      where: {
+        bar_code: data.bar_code,
+      },
+    });
 
-    if(bookExists){
-      throw new Error("Book already exists")
+    if (bookExists) {
+      throw new Error('Book already exists');
     }
-    
+
     const book = await this.prisma.book.create({
-      data
-    })
+      data,
+    });
 
     return book;
+  }
+
+  async findAll() {
+    return this.prisma.book.findMany();
+  }
+
+  //This ID is the param
+  async update(id: string, data: BookDTO) {
+    const bookExists = await this.prisma.book.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!bookExists) {
+      throw new Error('Book does not exists!');
+    }
+
+    return await this.prisma.book.update({
+      data,
+      where: {
+        id,
+      },
+    });
+  }
+
+  async delete(id: string) {
+    const bookExists = await this.prisma.book.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!bookExists) {
+      throw new Error('Book does not exists!');
+    }
+
+    return await this.prisma.book.delete({
+      where: {
+        id,
+      },
+    });
   }
 }
